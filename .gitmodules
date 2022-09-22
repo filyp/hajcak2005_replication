@@ -1,0 +1,3 @@
+[submodule "psychopy_experiment_helpers"]
+	path = psychopy_experiment_helpers
+	url = https://github.com/filyp/psychopy_experiment_helpers
