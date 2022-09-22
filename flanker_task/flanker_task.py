@@ -5,20 +5,9 @@ from psychopy import core, event, logging
 
 from psychopy_experiment_helpers.show_info import show_info
 from flanker_task.load_data import load_stimuli
-from flanker_task.triggers import (
-    TriggerTypes,
-    get_trigger_name,
-)
-from psychopy_experiment_helpers.triggers_common import (
-    TriggerHandler,
-    create_eeg_port,
-)
+from flanker_task.triggers import TriggerTypes, get_trigger_name
+from psychopy_experiment_helpers.triggers_common import TriggerHandler, create_eeg_port
 from flanker_task.prepare_experiment import prepare_trials
-from flanker_task.feedback import (
-    FeedbackTimerSteps,
-    FeedbackTimerMovingMedian,
-)
-from psychopy_experiment_helpers import run
 
 
 def check_response(config, event, mouse, clock, trigger_handler, block, trial, response_data):
@@ -114,14 +103,6 @@ def flanker_task(
         else:
             raise Exception(
                 "{} is bad block type in config Experiment_blocks".format(block["type"])
-            )
-
-        if config["Show_feedback"]:
-            # if we show cues, we need a separate threshold RT for each of them
-            # feedback_timer = FeedbackTimerSteps(
-            feedback_timer = FeedbackTimerMovingMedian(
-                config["Feedback_initial_threshold_rt"],
-                timer_names=config["Cues"] if config["Show_cues"] else [""],
             )
 
         RTs_in_block = []
@@ -312,38 +293,6 @@ def flanker_task(
             else:
                 reaction = "incorrect"
 
-            # ! draw feedback
-            if config["Show_feedback"]:
-                feedback_timer.update_threshold(
-                    target_name=trial["target_name"],
-                    reaction=reaction,
-                    timer_name=trial["cue"].text,
-                )
-                feedback_show_time = random.uniform(*config["Feedback_show_time"])
-                feedback_type = None
-                if reaction == "correct":
-                    feedback_type, trigger_type = feedback_timer.get_feedback(
-                        reaction_time=reaction_time,
-                        timer_name=trial["cue"].text,
-                    )
-                    trigger_name = get_trigger_name(
-                        trigger_type=trigger_type,
-                        block_type=block["type"],
-                        cue_name=trial["cue"].text,
-                        target_name=trial["target_name"],
-                    )
-                    trigger_handler.prepare_trigger(trigger_name)
-                    stimulus[feedback_type].setAutoDraw(True)
-
-                    win.flip()
-                    trigger_handler.send_trigger()
-                    core.wait(feedback_show_time)
-                    stimulus[feedback_type].setAutoDraw(False)
-                    data_saver.check_exit()
-                else:
-                    core.wait(feedback_show_time)
-                    data_saver.check_exit()
-
             # save beh
             # fmt: off
             cue_name = trial["cue"].text
@@ -355,7 +304,6 @@ def flanker_task(
                 response=response_side,
                 rt=reaction_time,
                 reaction=reaction,
-                threshold_rt=feedback_timer.thresholds[cue_name] if config["Show_feedback"] else None,
                 empty_screen_between_trials=empty_screen_between_trials,
                 cue_show_time=cue_show_time if config["Show_cues"] else None,
                 empty_screen_after_cue_show_time=empty_screen_after_cue_show_time if config["Show_cues"] else None,
@@ -363,8 +311,6 @@ def flanker_task(
                 flanker_show_time=flanker_show_time if "Flanker_show_time" in config else None,
                 target_show_time=target_show_time,
                 empty_screen_after_response_show_time=empty_screen_after_response_show_time,
-                feedback_show_time=feedback_show_time if config["Show_feedback"] else None,
-                feedback_type=feedback_type if config["Show_feedback"] else None,
             )
             # fmt: on
             data_saver.beh.append(behavioral_data)
@@ -376,6 +322,3 @@ def flanker_task(
 
             logging.data(f"Behavioral data: {behavioral_data}\n")
             logging.flush()
-
-
-run(flanker_task)
