@@ -1,4 +1,5 @@
 import random
+import numpy as np
 from collections import OrderedDict
 
 from psychopy import core, event, logging
@@ -44,6 +45,11 @@ def check_response(exp, block, trial, response_data):
         return None
 
 
+def random_time(min_time, max_time, step=0.100):
+    possible_times = np.arange(min_time, max_time + step, step)
+    return random.choice(possible_times)
+
+
 def flanker_task(exp, config, data_saver):
     # load stimulus
     stimulus = load_stimuli(win=exp.win, config=exp.config, screen_res=exp.screen_res)
@@ -62,6 +68,9 @@ def flanker_task(exp, config, data_saver):
         if block["type"] == "break":
             show_info(block["file_name"], exp)
             continue
+        elif block["type"] == "rest":
+            exp.display_for_duration(block["duration"], stimulus["fixation"])
+            continue
         elif block["type"] in ["experiment", "training"]:
             block["trials"] = prepare_trials(block, stimulus)
         else:
@@ -69,27 +78,27 @@ def flanker_task(exp, config, data_saver):
                 "{} is bad block type in config Experiment_blocks".format(block["type"])
             )
 
+        # ! draw empty screen
+        empty_screen_time = random_time(*config["Empty_screen_after_cue_show_time"])
+        exp.display_for_duration(empty_screen_time, stimulus["fixation"])
+
         for trial in block["trials"]:
             response_data = []
-
-            # ! show empty screen between trials
-            empty_screen_between_trials = random.uniform(*config["Empty_screen_between_trials"])
-            exp.display_for_duration(empty_screen_between_trials, stimulus["fixation"])
 
             if config["Show_cues"]:
                 # it's a version of the experiment where we show cues before stimuli
                 # ! draw cue
                 trigger_name = get_trigger_name(TriggerTypes.CUE, block, trial)
-                cue_show_time = random.uniform(*config["Cue_show_time"])
+                cue_show_time = random_time(*config["Cue_show_time"])
                 exp.display_for_duration(cue_show_time, trial["cue"], trigger_name)
 
                 # ! draw empty screen
-                empty_screen_after_cue = random.uniform(*config["Empty_screen_after_cue_show_time"])
+                empty_screen_after_cue = random_time(*config["Empty_screen_after_cue_show_time"])
                 exp.display_for_duration(empty_screen_after_cue, stimulus["fixation"])
 
             # ! draw target
             trigger_name = get_trigger_name(TriggerTypes.TARGET, block, trial)
-            target_show_time = random.uniform(*config["Target_show_time"])
+            target_show_time = random_time(*config["Target_show_time"])
             event.clearEvents()
             exp.win.callOnFlip(exp.mouse.clickReset)
             exp.win.callOnFlip(exp.clock.reset)
@@ -99,23 +108,19 @@ def flanker_task(exp, config, data_saver):
                 res = check_response(exp, block, trial, response_data)
                 if res is not None:
                     response_data.append(res)
-                    break  # if we got a response, break out of this stage
-                data_saver.check_exit()
                 exp.win.flip()
-            for target in trial["target"]:
-                target.setAutoDraw(False)
+            exp.stop_displaying(trial["target"])
             exp.win.flip()
 
             # ! draw empty screen and await response
-            empty_screen_show_time = random.uniform(*config["Blank_screen_for_response_show_time"])
-            exp.display(trial["fixation"], trigger_name=None)
+            empty_screen_show_time = random_time(*config["Blank_screen_for_response_show_time"])
+            exp.display(stimulus["fixation"])
             while exp.clock.getTime() < target_show_time + empty_screen_show_time:
                 res = check_response(exp, block, trial, response_data)
                 if res is not None:
                     response_data.append(res)
-                data_saver.check_exit()
                 exp.win.flip()
-            stimulus["fixation"].setAutoDraw(False)
+            exp.stop_displaying(stimulus["fixation"])
             data_saver.check_exit()
 
             # check if reaction was correct
@@ -143,7 +148,6 @@ def flanker_task(exp, config, data_saver):
                 response=response_side,
                 rt=reaction_time,
                 reaction=reaction,
-                empty_screen_between_trials=empty_screen_between_trials,
                 cue_show_time=cue_show_time if config["Show_cues"] else None,
                 empty_screen_after_cue_show_time=empty_screen_after_cue if config["Show_cues"] else None,
                 target_show_time=target_show_time,

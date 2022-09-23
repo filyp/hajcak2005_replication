@@ -25,9 +25,8 @@ Orientation: "horizontal"
 Show_cues: False
 
 # * times
-Empty_screen_between_trials: [0.600, 0.800]
-Target_show_time: [0.200, 0.200]
-Blank_screen_for_response_show_time: [1.700, 2.300]
+Target_show_time: [0.200, 0.200, 0.100]
+Blank_screen_for_response_show_time: [1.700, 2.300, 0.100]
 
 # * reaction keys
 # first one is for left response, second one is for right response
@@ -35,6 +34,7 @@ Keys: [mouse_left, mouse_right]
 
 # * experiment structure
 Experiment_blocks: [
+    {type: rest, duration: 30},
     {type: break, file_name: instruction.txt},
     {type: training, number_of_trials: 48, ratio_of_congruent: 0.5},
     {type: break, file_name: end_training.txt},

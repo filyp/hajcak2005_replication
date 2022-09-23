@@ -14,7 +14,7 @@ def get_trigger_name(
     trigger_type,
     block,
     trial=None,
-    response=None,
+    response="-",
 ):
     block_type = block["type"]
     if trial is not None:
