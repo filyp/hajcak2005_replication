@@ -25,15 +25,13 @@ def load_stimuli(win, config, screen_res):
     stimuli = dict()
 
     # ! create fixation
-    stimuli["fixations"] = [
-        visual.ImageStim(
-            win=win,
-            image=os.path.join("input_data", config["Fixation"]),
-            size=config["Fixation_size"],
-            name="fixation",
-            interpolate=True,
-        )
-    ]
+    stimuli["fixation"] = visual.ImageStim(
+        win=win,
+        image=os.path.join("input_data", config["Fixation"]),
+        size=config["Fixation_size"],
+        name="fixation",
+        interpolate=True,
+    )
 
     # ! create targets and flankers
     left_ = []

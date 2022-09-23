@@ -29,11 +29,9 @@ Cue_size: 0.055
 # * times
 Empty_screen_between_trials: [0.0, 0.0]
 Cue_show_time: [2.000, 2.000]
-Empty_screen_after_cue_show_time: [0.100, 0.100]
-Fixation_show_time: [0.600, 0.800]
+Empty_screen_after_cue_show_time: [0.700, 0.900]
 Target_show_time: [0.200, 0.200]
 Blank_screen_for_response_show_time: [1.700, 2.300]
-Empty_screen_after_response_show_time: [0.0, 0.0]
 
 # * reaction keys
 # first one is for left response, second one is for right response

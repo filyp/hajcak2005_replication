@@ -12,9 +12,16 @@ class TriggerTypes:
 
 def get_trigger_name(
     trigger_type,
-    block_type="--",
-    cue_name="-",
-    target_name="---",
+    block,
+    trial=None,
     response=None,
 ):
+    block_type=block["type"],
+    if trial is not None:
+        cue_name=trial["cue"].text,
+        target_name=trial["target_name"],
+    else:
+        cue_name="-",
+        target_name="---",
+    
     return f"{trigger_type}*{block_type[:2]}*{cue_name}*{target_name[-3:]}*{response}"
