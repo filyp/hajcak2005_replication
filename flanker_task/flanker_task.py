@@ -10,10 +10,11 @@ from psychopy_experiment_helpers.triggers_common import TriggerHandler, create_e
 from flanker_task.prepare_experiment import prepare_trials
 
 
-def check_response(config, event, mouse, clock, trigger_handler, block, trial, response_data):
+def check_response(exp, block, trial, response_data):
+    config = exp.config
     keylist = [key for group in config["Keys"] for key in group]
     keys = event.getKeys(keyList=keylist)
-    _, mouse_press_times = mouse.getPressed(getTime=True)
+    _, mouse_press_times = exp.mouse.getPressed(getTime=True)
 
     if mouse_press_times[0] != 0.0:
         keys.append("mouse_left")
@@ -23,7 +24,7 @@ def check_response(config, event, mouse, clock, trigger_handler, block, trial, r
         keys.append("mouse_right")
 
     if keys:
-        reaction_time = clock.getTime()
+        reaction_time = exp.clock.getTime()
         if response_data == []:
             trigger_type = TriggerTypes.REACTION
         else:
@@ -34,60 +35,32 @@ def check_response(config, event, mouse, clock, trigger_handler, block, trial, r
             response_side = "r"
 
         trigger_name = get_trigger_name(trigger_type, block, trial, response_side)
-        trigger_handler.prepare_trigger(trigger_name)
-        trigger_handler.send_trigger()
-        mouse.clickReset()
+        exp.trigger_handler.prepare_trigger(trigger_name)
+        exp.trigger_handler.send_trigger()
+        exp.mouse.clickReset()
         event.clearEvents()
         return response_side, reaction_time
     else:
         return None
 
 
-def get_reaction_stats(RTs_in_block, num_of_errors_in_block):
-    if RTs_in_block is None or num_of_errors_in_block is None:
-        return ""
-    if RTs_in_block == []:
-        return ""
-
-    mean_rt = sum(RTs_in_block) / len(RTs_in_block)
-    return f"Średni czas reakcji: {int(mean_rt * 1000)} ms\nLiczba błędów: {num_of_errors_in_block}"
-
-
-def flanker_task(
-    win,
-    screen_res,
-    config,
-    data_saver,
-):
-    clock = core.Clock()
-    mouse = event.Mouse(win=win, visible=False)
-
-    RTs_in_block = None
-    num_of_errors_in_block = None
-
+def flanker_task(exp, config, data_saver):
     # load stimulus
-    stimulus = load_stimuli(win=win, config=config, screen_res=screen_res)
+    stimulus = load_stimuli(win=exp.win, config=exp.config, screen_res=exp.screen_res)
 
     # EEG triggers
     port_eeg = create_eeg_port() if config["Send_EEG_trigg"] else None
-    trigger_handler = TriggerHandler(port_eeg, data_saver=data_saver)
+    exp.trigger_handler = TriggerHandler(port_eeg, data_saver=data_saver)
 
-    for block in config["Experiment_blocks"]:
+    for block in exp.config["Experiment_blocks"]:
         trigger_name = get_trigger_name(TriggerTypes.BLOCK_START, block)
-        trigger_handler.prepare_trigger(trigger_name)
-        trigger_handler.send_trigger()
+        exp.trigger_handler.prepare_trigger(trigger_name)
+        exp.trigger_handler.send_trigger()
         logging.data(f"Entering block: {block}")
         logging.flush()
 
         if block["type"] == "break":
-            show_info(
-                win=win,
-                file_name=block["file_name"],
-                config=config,
-                screen_width=screen_res["width"],
-                data_saver=data_saver,
-                insert=get_reaction_stats(RTs_in_block, num_of_errors_in_block),
-            )
+            show_info(block["file_name"], exp)
             continue
         elif block["type"] in ["experiment", "training"]:
             block["trials"] = prepare_trials(block, stimulus)
@@ -96,98 +69,52 @@ def flanker_task(
                 "{} is bad block type in config Experiment_blocks".format(block["type"])
             )
 
-        RTs_in_block = []
-        num_of_errors_in_block = 0
-
         for trial in block["trials"]:
             response_data = []
 
             # ! show empty screen between trials
             empty_screen_between_trials = random.uniform(*config["Empty_screen_between_trials"])
-            stimulus["fixation"].setAutoDraw(True)
-            win.flip()
-            core.wait(empty_screen_between_trials)
-            stimulus["fixation"].setAutoDraw(False)
-            data_saver.check_exit()
+            exp.display_for_duration(empty_screen_between_trials, stimulus["fixation"])
 
             if config["Show_cues"]:
                 # it's a version of the experiment where we show cues before stimuli
                 # ! draw cue
-                cue_show_time = random.uniform(*config["Cue_show_time"])
-                cue = trial["cue"]
                 trigger_name = get_trigger_name(TriggerTypes.CUE, block, trial)
-                trigger_handler.prepare_trigger(trigger_name)
-
-                cue.setAutoDraw(True)
-                win.flip()
-                trigger_handler.send_trigger()
-
-                core.wait(cue_show_time)
-                cue.setAutoDraw(False)
-                data_saver.check_exit()
-                win.flip()
+                cue_show_time = random.uniform(*config["Cue_show_time"])
+                exp.display_for_duration(cue_show_time, trial["cue"], trigger_name)
 
                 # ! draw empty screen
-                empty_screen_after_cue_show_time = random.uniform(
-                    *config["Empty_screen_after_cue_show_time"]
-                )
-                stimulus["fixation"].setAutoDraw(True)
-                win.flip()
-                core.wait(empty_screen_after_cue_show_time)
-                stimulus["fixation"].setAutoDraw(False)
-                data_saver.check_exit()
+                empty_screen_after_cue = random.uniform(*config["Empty_screen_after_cue_show_time"])
+                exp.display_for_duration(empty_screen_after_cue, stimulus["fixation"])
 
             # ! draw target
             trigger_name = get_trigger_name(TriggerTypes.TARGET, block, trial)
-            trigger_handler.prepare_trigger(trigger_name)
             target_show_time = random.uniform(*config["Target_show_time"])
-            for target in trial["target"]:
-                target.setAutoDraw(True)
             event.clearEvents()
-            win.callOnFlip(clock.reset)
-            win.callOnFlip(mouse.clickReset)
+            exp.win.callOnFlip(exp.mouse.clickReset)
+            exp.win.callOnFlip(exp.clock.reset)
+            exp.display(trial["target"], trigger_name)
 
-            win.flip()
-            trigger_handler.send_trigger()
-            while clock.getTime() < target_show_time:
-                res = check_response(
-                    config,
-                    event,
-                    mouse,
-                    clock,
-                    trigger_handler,
-                    block,
-                    trial,
-                    response_data,
-                )
+            while exp.clock.getTime() < target_show_time:
+                res = check_response(exp, block, trial, response_data)
                 if res is not None:
                     response_data.append(res)
                     break  # if we got a response, break out of this stage
                 data_saver.check_exit()
-                win.flip()
+                exp.win.flip()
             for target in trial["target"]:
                 target.setAutoDraw(False)
-            win.flip()
+            exp.win.flip()
 
             # ! draw empty screen and await response
             empty_screen_show_time = random.uniform(*config["Blank_screen_for_response_show_time"])
-            stimulus["fixation"].setAutoDraw(True)
-            win.flip()
-            while clock.getTime() < target_show_time + empty_screen_show_time:
-                res = check_response(
-                    config,
-                    event,
-                    mouse,
-                    clock,
-                    trigger_handler,
-                    block,
-                    trial,
-                    response_data,
-                )
+            exp.display(trial["fixation"], trigger_name=None)
+            while exp.clock.getTime() < target_show_time + empty_screen_show_time:
+                res = check_response(exp, block, trial, response_data)
                 if res is not None:
                     response_data.append(res)
                 data_saver.check_exit()
-                win.flip()
+                exp.win.flip()
             stimulus["fixation"].setAutoDraw(False)
             data_saver.check_exit()
 
@@ -218,16 +145,11 @@ def flanker_task(
                 reaction=reaction,
                 empty_screen_between_trials=empty_screen_between_trials,
                 cue_show_time=cue_show_time if config["Show_cues"] else None,
-                empty_screen_after_cue_show_time=empty_screen_after_cue_show_time if config["Show_cues"] else None,
+                empty_screen_after_cue_show_time=empty_screen_after_cue if config["Show_cues"] else None,
                 target_show_time=target_show_time,
             )
             # fmt: on
             data_saver.beh.append(behavioral_data)
-
-            # update block stats
-            if reaction_time is not None:
-                RTs_in_block.append(reaction_time)
-            num_of_errors_in_block += 1 if reaction == "incorrect" else 0
 
             logging.data(f"Behavioral data: {behavioral_data}\n")
             logging.flush()
