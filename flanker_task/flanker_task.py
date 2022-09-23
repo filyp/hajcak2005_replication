@@ -159,26 +159,6 @@ def flanker_task(
                     fixation.setAutoDraw(False)
             data_saver.check_exit()
 
-            if "Flanker_show_time" in config:
-                # it's a version of the experiment where we first draw flankers, then target
-                # ! draw flankers
-                trigger_name = get_trigger_name(
-                    trigger_type=TriggerTypes.FLANKER,
-                    block_type=block["type"],
-                    cue_name=trial["cue"].text,
-                    target_name=trial["target_name"],
-                )
-                trigger_handler.prepare_trigger(trigger_name)
-                flanker_show_time = random.uniform(*config["Flanker_show_time"])
-                for flanker in trial["flankers"]:
-                    flanker.setAutoDraw(True)
-
-                win.flip()
-                trigger_handler.send_trigger()
-                core.wait(flanker_show_time)
-                for flanker in trial["flankers"]:
-                    flanker.setAutoDraw(False)
-
             if config.get("Keep_fixation_until_target"):
                 for fixation in stimulus["fixations"]:
                     fixation.setAutoDraw(False)
@@ -222,41 +202,21 @@ def flanker_task(
 
             # ! draw empty screen and await response
             empty_screen_show_time = random.uniform(*config["Blank_screen_for_response_show_time"])
-            if response_data == []:
-                while clock.getTime() < target_show_time + empty_screen_show_time:
-                    res = check_response(
-                        config,
-                        event,
-                        mouse,
-                        clock,
-                        trigger_handler,
-                        block,
-                        trial,
-                        response_data,
-                    )
-                    if res is not None:
-                        response_data.append(res)
-                        break  # if we got a response, break out of this stage
-                    data_saver.check_exit()
-                    win.flip()
-
-            if config["Use_whole_response_time_window"]:
-                # even if participant responded, wait out the response time window
-                while clock.getTime() < target_show_time + empty_screen_show_time:
-                    res = check_response(
-                        config,
-                        event,
-                        mouse,
-                        clock,
-                        trigger_handler,
-                        block,
-                        trial,
-                        response_data,
-                    )
-                    if res is not None:
-                        response_data.append(res)
-                    data_saver.check_exit()
-                    win.flip()
+            while clock.getTime() < target_show_time + empty_screen_show_time:
+                res = check_response(
+                    config,
+                    event,
+                    mouse,
+                    clock,
+                    trigger_handler,
+                    block,
+                    trial,
+                    response_data,
+                )
+                if res is not None:
+                    response_data.append(res)
+                data_saver.check_exit()
+                win.flip()
 
             # ! show empty screen after response
             empty_screen_after_response_show_time = random.uniform(
@@ -308,7 +268,6 @@ def flanker_task(
                 cue_show_time=cue_show_time if config["Show_cues"] else None,
                 empty_screen_after_cue_show_time=empty_screen_after_cue_show_time if config["Show_cues"] else None,
                 fixation_show_time=fixation_show_time,
-                flanker_show_time=flanker_show_time if "Flanker_show_time" in config else None,
                 target_show_time=target_show_time,
                 empty_screen_after_response_show_time=empty_screen_after_response_show_time,
             )

@@ -35,9 +35,6 @@ Target_show_time: [0.200, 0.200]
 Blank_screen_for_response_show_time: [1.700, 2.300]
 Empty_screen_after_response_show_time: [0.0, 0.0]
 
-# if this is False, we will end response time windw immediately after response, and carry on
-# if True, we will wait until the whole window ends even after the response, like in Hajcak2005
-Use_whole_response_time_window: True
 
 # * reaction keys
 # first one is for left response, second one is for right response
