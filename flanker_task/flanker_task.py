@@ -51,17 +51,23 @@ def random_time(min_time, max_time, step=0.100):
 
 
 def flanker_task(exp, config, data_saver):
+    # unpack necessary objects for easier access
+    win = exp.win
+    mouse = exp.mouse
+    clock = exp.clock
+    
     # load stimulus
-    stimulus = load_stimuli(win=exp.win, config=exp.config, screen_res=exp.screen_res)
+    stimulus = load_stimuli(win=win, config=exp.config, screen_res=exp.screen_res)
 
     # EEG triggers
     port_eeg = create_eeg_port() if config["Send_EEG_trigg"] else None
-    exp.trigger_handler = TriggerHandler(port_eeg, data_saver=data_saver)
+    trigger_handler = TriggerHandler(port_eeg, data_saver=data_saver)
+    exp.trigger_handler = trigger_handler
 
-    for block in exp.config["Experiment_blocks"]:
+    for block in config["Experiment_blocks"]:
         trigger_name = get_trigger_name(TriggerTypes.BLOCK_START, block)
-        exp.trigger_handler.prepare_trigger(trigger_name)
-        exp.trigger_handler.send_trigger()
+        trigger_handler.prepare_trigger(trigger_name)
+        trigger_handler.send_trigger()
         logging.data(f"Entering block: {block}")
         logging.flush()
 
@@ -100,27 +106,34 @@ def flanker_task(exp, config, data_saver):
             trigger_name = get_trigger_name(TriggerTypes.TARGET, block, trial)
             target_show_time = random_time(*config["Target_show_time"])
             event.clearEvents()
-            exp.win.callOnFlip(exp.mouse.clickReset)
-            exp.win.callOnFlip(exp.clock.reset)
-            exp.display(trial["target"], trigger_name)
+            win.callOnFlip(mouse.clickReset)
+            win.callOnFlip(clock.reset)
+            trigger_handler.prepare_trigger(trigger_name)
+            for s in trial["target"]:
+                s.setAutoDraw(True)
+            win.flip()
+            trigger_handler.send_trigger()
 
-            while exp.clock.getTime() < target_show_time:
+
+            while clock.getTime() < target_show_time:
                 res = check_response(exp, block, trial, response_data)
                 if res is not None:
                     response_data.append(res)
-                exp.win.flip()
-            exp.stop_displaying(trial["target"])
-            exp.win.flip()
+                win.flip()
+            for s in trial["target"]:
+                s.setAutoDraw(False)
+            win.flip()
 
             # ! draw empty screen and await response
             empty_screen_show_time = random_time(*config["Blank_screen_for_response_show_time"])
-            exp.display(stimulus["fixation"])
-            while exp.clock.getTime() < target_show_time + empty_screen_show_time:
+            stimulus["fixation"].setAutoDraw(True)
+            win.flip()
+            while clock.getTime() < target_show_time + empty_screen_show_time:
                 res = check_response(exp, block, trial, response_data)
                 if res is not None:
                     response_data.append(res)
-                exp.win.flip()
-            exp.stop_displaying(stimulus["fixation"])
+                win.flip()
+            stimulus["fixation"].setAutoDraw(False)
             data_saver.check_exit()
 
             # check if reaction was correct
@@ -139,11 +152,10 @@ def flanker_task(exp, config, data_saver):
 
             # save beh
             # fmt: off
-            cue_name = trial["cue"].text
             behavioral_data = OrderedDict(
                 block_type=block["type"],
                 trial_type=trial["type"],
-                cue_name=cue_name,
+                cue_name=trial["cue"].text,
                 target_name=trial["target_name"],
                 response=response_side,
                 rt=reaction_time,
