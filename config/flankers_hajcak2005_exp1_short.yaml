@@ -45,6 +45,5 @@ Experiment_blocks: [
     {type: break, file_name: end_training.txt},
 
     {type: experiment, number_of_trials: 8, ratio_of_congruent: 0.5, ratio_of_first_cue: 0.5},
-    {type: break, file_name: break1.txt},
 
     {type: break, file_name: end.txt}]

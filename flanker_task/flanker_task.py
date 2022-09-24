@@ -55,7 +55,7 @@ def flanker_task(exp, config, data_saver):
     win = exp.win
     mouse = exp.mouse
     clock = exp.clock
-    
+
     # load stimulus
     stimulus = load_stimuli(win=win, config=exp.config, screen_res=exp.screen_res)
 
@@ -113,7 +113,6 @@ def flanker_task(exp, config, data_saver):
                 s.setAutoDraw(True)
             win.flip()
             trigger_handler.send_trigger()
-
 
             while clock.getTime() < target_show_time:
                 res = check_response(exp, block, trial, response_data)

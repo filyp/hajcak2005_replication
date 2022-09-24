@@ -18,10 +18,13 @@ def get_trigger_name(
 ):
     block_type = block["type"]
     if trial is not None:
-        cue_name = trial["cue"].text
         target_name = trial["target_name"]
+        cue_name = str(trial["cue"].text)
+        # make the cues take always 3 chars for better readability
+        if len(cue_name) == 1:
+            cue_name = "_" + cue_name + "_"
     else:
-        cue_name = "-"
+        cue_name = "---"
         target_name = "---"
 
     return f"{trigger_type}*{block_type[:2]}*{cue_name}*{target_name[-3:]}*{response}"
