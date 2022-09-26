@@ -1,0 +1,44 @@
+Procedure: "Flanker task"
+
+# * EEG
+Ophthalmic_procedure: False
+Send_EEG_trigg: False
+Actiview_reminder: True
+
+# * view parameters
+Screen_color: "black"
+Text_color: "white"
+Text_size: 0.04
+Flanker_size: 0.092
+Text_font: "Arial"
+
+# * flanker parameters
+Fixation: "+.png"
+Arrow_left: "bracket_left.png"
+Arrow_right: "bracket_right.png"
+Fixation_size: 0.04
+Flanker_size: [0.05, 0.05]
+Flanker_spacing: 0.04
+Orientation: "horizontal"
+
+# * cue definition
+Show_cues: False
+
+# * times
+Target_show_time: [0.200, 0.200, 0.100]
+Blank_screen_for_response_show_time: [1.700, 2.300, 0.100]
+
+# * reaction keys
+# first one is for left response, second one is for right response
+Keys: [mouse_left, mouse_right]
+
+# * experiment structure
+Experiment_blocks: [
+    {type: rest, duration: 5},
+    {type: break, file_name: instruction.txt},
+    {type: training, number_of_trials: 8, ratio_of_congruent: 0.5},
+    {type: break, file_name: end_training.txt},
+
+    {type: experiment, number_of_trials: 8, ratio_of_congruent: 0.5},
+
+    {type: break, file_name: end.txt}]

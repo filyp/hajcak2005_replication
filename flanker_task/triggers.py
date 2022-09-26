@@ -7,6 +7,7 @@ class TriggerTypes:
     FEEDB_GOOD = "F_GOOD__"
     FEEDB_BAD = "F_BAD___"
     SECOND_REACTION = "SECOND_R"
+    FIXATION = "FIXATION"
     BLOCK_START = "BLOCK_START"
 
 

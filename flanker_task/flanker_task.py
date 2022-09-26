@@ -46,7 +46,8 @@ def check_response(exp, block, trial, response_data):
 
 
 def random_time(min_time, max_time, step=0.100):
-    possible_times = np.arange(min_time, max_time + step, step)
+    steps = int((max_time - min_time) / step + 1)
+    possible_times = np.linspace(min_time, max_time, steps)
     return random.choice(possible_times)
 
 
@@ -75,7 +76,8 @@ def flanker_task(exp, config, data_saver):
             show_info(block["file_name"], exp)
             continue
         elif block["type"] == "rest":
-            exp.display_for_duration(block["duration"], stimulus["fixation"])
+            trigger_name = get_trigger_name(TriggerTypes.FIXATION, block)
+            exp.display_for_duration(block["duration"], stimulus["fixation"], trigger_name)
             continue
         elif block["type"] in ["experiment", "training"]:
             block["trials"] = prepare_trials(block, stimulus)
@@ -85,8 +87,9 @@ def flanker_task(exp, config, data_saver):
             )
 
         # ! draw empty screen
-        empty_screen_time = random_time(*config["Empty_screen_after_cue_show_time"])
-        exp.display_for_duration(empty_screen_time, stimulus["fixation"])
+        trigger_name = get_trigger_name(TriggerTypes.FIXATION, block)
+        empty_screen_time = random_time(*config["Blank_screen_for_response_show_time"])
+        exp.display_for_duration(empty_screen_time, stimulus["fixation"], trigger_name)
 
         for trial in block["trials"]:
             response_data = []
@@ -99,8 +102,9 @@ def flanker_task(exp, config, data_saver):
                 exp.display_for_duration(cue_show_time, trial["cue"], trigger_name)
 
                 # ! draw empty screen
+                trigger_name = get_trigger_name(TriggerTypes.FIXATION, block, trial)
                 empty_screen_after_cue = random_time(*config["Empty_screen_after_cue_show_time"])
-                exp.display_for_duration(empty_screen_after_cue, stimulus["fixation"])
+                exp.display_for_duration(empty_screen_after_cue, stimulus["fixation"], trigger_name)
 
             # ! draw target
             trigger_name = get_trigger_name(TriggerTypes.TARGET, block, trial)
@@ -113,7 +117,6 @@ def flanker_task(exp, config, data_saver):
                 s.setAutoDraw(True)
             win.flip()
             trigger_handler.send_trigger()
-
             while clock.getTime() < target_show_time:
                 res = check_response(exp, block, trial, response_data)
                 if res is not None:
@@ -124,9 +127,12 @@ def flanker_task(exp, config, data_saver):
             win.flip()
 
             # ! draw empty screen and await response
+            trigger_name = get_trigger_name(TriggerTypes.FIXATION, block, trial)
             empty_screen_show_time = random_time(*config["Blank_screen_for_response_show_time"])
+            trigger_handler.prepare_trigger(trigger_name)
             stimulus["fixation"].setAutoDraw(True)
             win.flip()
+            trigger_handler.send_trigger()
             while clock.getTime() < target_show_time + empty_screen_show_time:
                 res = check_response(exp, block, trial, response_data)
                 if res is not None:
