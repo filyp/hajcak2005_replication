@@ -1,7 +1,7 @@
 Procedure: "Flanker task"
 
 # * EEG
-Send_EEG_trigg: False
+Send_EEG_trigg: True
 Actiview_reminder: True
 
 # * view parameters
@@ -40,7 +40,7 @@ Keys: [mouse_left, mouse_right]
 # * experiment structure
 Experiment_blocks: [
     {type: break, file_name: instruction.txt},
-    # {type: training, number_of_trials: 8, ratio_of_congruent: 0.5, ratio_of_first_cue: 0.5},
+    {type: training, number_of_trials: 8, ratio_of_congruent: 0.5, ratio_of_first_cue: 0.5},
     {type: break, file_name: end_training.txt},
     {type: rest, duration: 5, info_duration: 4, file_name: rest_info.txt},
 

@@ -83,6 +83,7 @@ def load_stimuli(win, config, screen_res):
             wrapWidth=screen_res["width"],
             color=config["Text_color"],
             name="cue1",
+            pos=config["Cue_pos"],
         )
         stimuli["cue2"] = visual.TextStim(
             win=win,
@@ -93,6 +94,7 @@ def load_stimuli(win, config, screen_res):
             wrapWidth=screen_res["width"],
             color=config["Text_color"],
             name="cue2",
+            pos=config["Cue_pos"],
         )
     else:
         # create mock cue stimuli

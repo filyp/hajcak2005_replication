@@ -24,6 +24,7 @@ Orientation: "horizontal"
 Show_cues: True
 Cues: [5, 100]
 Cue_size: 0.081  # 2 degrees
+Cue_pos: [0.0, 0.005]
 
 # * times
 Cue_show_time: [2.000, 2.000, 0.100]
