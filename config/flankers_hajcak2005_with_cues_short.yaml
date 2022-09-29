@@ -33,10 +33,6 @@ Target_show_time: [0.200, 0.200, 0.100]
 Blank_screen_for_response_show_time: [1.700, 2.300, 0.100]
 
 
-# * reaction keys
-# first one is for left response, second one is for right response
-Keys: [mouse_left, mouse_right]
-
 # * experiment structure
 Experiment_blocks: [
     {type: break, file_name: instruction.txt},

@@ -12,38 +12,46 @@ from flanker_task.prepare_experiment import prepare_trials
 
 
 def check_response(exp, block, trial, response_data):
-    config = exp.config
-    keylist = [key for group in config["Keys"] for key in group]
-    keys = event.getKeys(keyList=keylist)
-    _, mouse_press_times = exp.mouse.getPressed(getTime=True)
-    # print(mouse_press_times)
+    _, press_times = exp.mouse.getPressed(getTime=True)
 
-    if mouse_press_times[0] != 0.0:
-        keys.append("mouse_left")
-    elif mouse_press_times[1] != 0.0:
-        keys.append("mouse_middle")
-    elif mouse_press_times[2] != 0.0:
-        keys.append("mouse_right")
-
-    if keys:
-        reaction_time = exp.clock.getTime()
-        if response_data == []:
-            trigger_type = TriggerTypes.REACTION
+    second_key = None
+    if press_times[0] == 0.0 and press_times[2] == 0.0:
+        return
+    elif press_times[0] != 0.0 and press_times[2] == 0.0:
+        key = "l"
+        reaction_time = press_times[0]
+    elif press_times[0] == 0.0 and press_times[2] != 0.0:
+        key = "r"
+        reaction_time = press_times[2]
+    else:
+        if press_times[0] < press_times[2]:
+            key = "l"
+            second_key = "r"
+            reaction_time = press_times[0]
         else:
-            trigger_type = TriggerTypes.SECOND_REACTION
-        if keys[0] in config["Keys"][0]:
-            response_side = "l"
-        elif keys[0] in config["Keys"][1]:
-            response_side = "r"
+            key = "r"
+            second_key = "l"
+            reaction_time = press_times[2]
 
-        trigger_name = get_trigger_name(trigger_type, block, trial, response_side)
+    if response_data == []:
+        trigger_type = TriggerTypes.REACTION
+    else:
+        trigger_type = TriggerTypes.SECOND_REACTION
+
+    # logging.data(press_times)
+
+    trigger_name = get_trigger_name(trigger_type, block, trial, key)
+    exp.trigger_handler.prepare_trigger(trigger_name)
+    exp.trigger_handler.send_trigger()
+    response_data.append((key, reaction_time))
+
+    if second_key is not None:
+        trigger_name = get_trigger_name(TriggerTypes.SECOND_REACTION, block, trial, second_key)
         exp.trigger_handler.prepare_trigger(trigger_name)
         exp.trigger_handler.send_trigger()
-        exp.mouse.clickReset()
-        event.clearEvents()
-        return response_side, reaction_time
-    else:
-        return None
+        response_data.append((second_key, None))
+
+    exp.mouse.clickReset()
 
 
 def random_time(min_time, max_time, step=0.100):
@@ -120,9 +128,7 @@ def flanker_task(exp, config, data_saver):
             win.flip()
             trigger_handler.send_trigger()
             while clock.getTime() < target_show_time:
-                res = check_response(exp, block, trial, response_data)
-                if res is not None:
-                    response_data.append(res)
+                check_response(exp, block, trial, response_data)
                 win.flip()
             for s in trial["target"]:
                 s.setAutoDraw(False)
@@ -136,9 +142,7 @@ def flanker_task(exp, config, data_saver):
             win.flip()
             trigger_handler.send_trigger()
             while clock.getTime() < target_show_time + empty_screen_show_time:
-                res = check_response(exp, block, trial, response_data)
-                if res is not None:
-                    response_data.append(res)
+                check_response(exp, block, trial, response_data)
                 win.flip()
             stimulus["fixation"].setAutoDraw(False)
             data_saver.check_exit()
