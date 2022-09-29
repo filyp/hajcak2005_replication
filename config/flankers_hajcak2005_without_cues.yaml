@@ -33,10 +33,10 @@ Keys: [mouse_left, mouse_right]
 
 # * experiment structure
 Experiment_blocks: [
-    {type: rest, duration: 30},
     {type: break, file_name: instruction.txt},
     {type: training, number_of_trials: 48, ratio_of_congruent: 0.5},
     {type: break, file_name: end_training.txt},
+    {type: rest, duration: 30, info_duration: 4, file_name: rest_info.txt},
 
     {type: experiment, number_of_trials: 48, ratio_of_congruent: 0.5},
     {type: break, file_name: break1.txt},

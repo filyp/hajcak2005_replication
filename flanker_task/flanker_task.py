@@ -16,6 +16,7 @@ def check_response(exp, block, trial, response_data):
     keylist = [key for group in config["Keys"] for key in group]
     keys = event.getKeys(keyList=keylist)
     _, mouse_press_times = exp.mouse.getPressed(getTime=True)
+    # print(mouse_press_times)
 
     if mouse_press_times[0] != 0.0:
         keys.append("mouse_left")
@@ -76,6 +77,7 @@ def flanker_task(exp, config, data_saver):
             show_info(block["file_name"], exp)
             continue
         elif block["type"] == "rest":
+            show_info(block["file_name"], exp, duration=block["info_duration"])
             trigger_name = get_trigger_name(TriggerTypes.FIXATION, block)
             exp.display_for_duration(block["duration"], stimulus["fixation"], trigger_name)
             continue
