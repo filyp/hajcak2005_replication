@@ -75,7 +75,7 @@ def flanker_task(exp, config, data_saver):
     exp.trigger_handler = trigger_handler
 
     for block in config["Experiment_blocks"]:
-        trigger_name = get_trigger_name(TriggerTypes.BLOCK_START, block)
+        trigger_name = get_trigger_name(TriggerTypes.BLOCK_START, block, response="-")
         trigger_handler.prepare_trigger(trigger_name)
         trigger_handler.send_trigger()
         logging.data(f"Entering block: {block}")
@@ -86,7 +86,7 @@ def flanker_task(exp, config, data_saver):
             continue
         elif block["type"] == "rest":
             show_info(block["file_name"], exp, duration=block["info_duration"])
-            trigger_name = get_trigger_name(TriggerTypes.FIXATION, block)
+            trigger_name = get_trigger_name(TriggerTypes.FIXATION, block, response="-")
             exp.display_for_duration(block["duration"], stimulus["fixation"], trigger_name)
             continue
         elif block["type"] in ["experiment", "training"]:
@@ -97,12 +97,13 @@ def flanker_task(exp, config, data_saver):
             )
 
         # ! draw empty screen
-        trigger_name = get_trigger_name(TriggerTypes.FIXATION, block)
+        trigger_name = get_trigger_name(TriggerTypes.FIXATION, block, response="-")
         empty_screen_time = random_time(*config["Blank_screen_for_response_show_time"])
         exp.display_for_duration(empty_screen_time, stimulus["fixation"], trigger_name)
 
         for trial in block["trials"]:
             response_data = []
+            trigger_handler.open_trial()
 
             if config["Show_cues"]:
                 # it's a version of the experiment where we show cues before stimuli
@@ -155,7 +156,7 @@ def flanker_task(exp, config, data_saver):
                 # right is correct
                 correct_side = "r"
 
-            response_side, reaction_time = response_data[0] if response_data != [] else (None, None)
+            response_side, reaction_time = response_data[0] if response_data != [] else ("-", "-")
             if response_side == correct_side:
                 reaction = "correct"
             else:
@@ -177,6 +178,7 @@ def flanker_task(exp, config, data_saver):
             )
             # fmt: on
             data_saver.beh.append(behavioral_data)
+            trigger_handler.close_trial(response_side)
 
             logging.data(f"Behavioral data: {behavioral_data}\n")
             logging.flush()
