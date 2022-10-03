@@ -15,23 +15,11 @@ files.sort(key=os.path.getctime)
 most_recent_file = files[-1]
 most_recent_file
 
-
 with open(most_recent_file, "r") as file:
     reader = csv.DictReader(file)
     rows = [row for row in reader]
 
-# # cluster into blocks
-# blocks = []
-# for previous_row, current_row in zip([dict()] + rows[:-1], rows):
-#     if previous_row.get("block_type") != current_row.get("block_type"):
-#         # next_row is in a new block
-#         blocks.append((current_row.get("block_type"), []))
-#     # append row to the latest block
-#     blocks[-1][1].append(current_row)
-
-# experiment_block = blocks[-1][1]  # TODO make it general
 experiment_rows = [row for row in rows if row["block_type"] == "experiment"]
-
 
 congruent_correct_rts = []
 incongruent_correct_rts = []
@@ -91,18 +79,3 @@ INCONGRUENT  |  {print_len(incongruent_correct_rts)}  |  {print_len(incongruent_
 ALL          |  {print_len(congruent_correct_rts + incongruent_correct_rts)}  |  {print_len(congruent_error_rts + incongruent_error_rts)}  |  {print_len(congruent_correct_rts + congruent_error_rts + incongruent_correct_rts + incongruent_error_rts)}  |
 """
 )
-
-
-from collections import Counter
-
-c = Counter()
-
-for trial in experiment_rows:
-    rt = trial["rt"]
-    feedback_type = trial["feedback_type"]
-    threshold_rt = trial["threshold_rt"]
-    # print(rt, feedback_type, threshold_rt)
-    c.update([feedback_type])
-
-
-print(c)
