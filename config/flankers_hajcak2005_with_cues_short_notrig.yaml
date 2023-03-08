@@ -1,7 +1,7 @@
 Procedure: "Flanker task"
 
 # * EEG
-Send_EEG_trigg: True
+Send_EEG_trigg: False
 Actiview_reminder: True
 
 # * view parameters
