@@ -1,0 +1,1 @@
+C:\"Program Files"\PsychoPy\python.exe main.py config\flankers_hajcak2005_without_cues.yaml
