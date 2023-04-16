@@ -55,7 +55,7 @@ def check_response(exp, block, trial, response_data):
 
 
 def random_time(min_time, max_time, step=0.100):
-    steps = int((max_time - min_time) / step + 1)
+    steps = round((max_time - min_time) / step) + 1
     possible_times = np.linspace(min_time, max_time, steps)
     return random.choice(possible_times)
 
