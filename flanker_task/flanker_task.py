@@ -78,8 +78,8 @@ def flanker_task(exp, config, data_saver):
         trigger_name = get_trigger_name(TriggerTypes.BLOCK_START, block, response="-")
         trigger_handler.prepare_trigger(trigger_name)
         trigger_handler.send_trigger()
-        logging.data(f"Entering block: {block}")
-        logging.flush()
+        # logging.data(f"Entering block: {block}")
+        # logging.flush()
 
         if block["type"] == "break":
             show_info(block["file_name"], exp)
@@ -180,5 +180,5 @@ def flanker_task(exp, config, data_saver):
             data_saver.beh.append(behavioral_data)
             trigger_handler.close_trial(response_side)
 
-            logging.data(f"Behavioral data: {behavioral_data}\n")
-            logging.flush()
+            # logging.data(f"Behavioral data: {behavioral_data}\n")
+            # logging.flush()
