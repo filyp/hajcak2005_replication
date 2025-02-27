@@ -28,7 +28,7 @@ Cue_pos: [0.0, 0.004]
 
 # * times
 Cue_show_time: [2.000, 2.000, 0.100]
-Empty_screen_after_cue_show_time: [0.500, 0.800, 0.100]
+Empty_screen_after_cue_show_time: [0.200, 0.800, 0.100]
 Target_show_time: [0.200, 0.200, 0.100]
 Blank_screen_for_response_show_time: [1.700, 2.300, 0.100]
 
