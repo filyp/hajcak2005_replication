@@ -1,3 +1,7 @@
+# usage: there are two variants of the rest procedure:
+# python rest.py open
+# python rest.py closed
+
 #trigger key
 # 1 - closed
 # 2 - open
@@ -24,11 +28,11 @@ from psychopy_experiment_helpers.save_data import DataSaver
 from psychopy_experiment_helpers.screen import create_win
 from psychopy_experiment_helpers.triggers_common import TriggerHandler, create_eeg_port
 
-starting_instructions = """\
-Teraz nagramy 8 minut danych w spoczynku. W tym czasie będziesz siedział/a wygodnie w fotelu, z zamkniętymi lub otwartymi oczami. W trakcie nagrywania usłyszysz komendy głosowe, które będą Ci mówić, kiedy masz otworzyć lub zamknąć oczy. 
+# starting_instructions = """\
+# Teraz nagramy 8 minut danych w spoczynku. W tym czasie będziesz siedział/a wygodnie w fotelu, z zamkniętymi lub otwartymi oczami. W trakcie nagrywania usłyszysz komendy głosowe, które będą Ci mówić, kiedy masz otworzyć lub zamknąć oczy. 
 
-Kliknij myszką, aby rozpocząć.
-"""
+# Kliknij myszką, aby rozpocząć.
+# """
 
 # We will record 8 minutes of resting state data, of which 4 minutes are recorded while eyes are closed and 4 minutes while eyes are opened. Conditions will vary in 1 minute blocks.
 # The voice commands are given to the participants to open and close their eyes, or keep their eyes open/closed. The presentation software should display instructions in the language of your choice (if available, see below), deliver the voice commands, and send EEG triggers.
@@ -74,8 +78,15 @@ win, screen_res = create_win(
 )
 mouse = event.Mouse(win=win, visible=False)
 
+fixation = visual.TextStim(
+    win=win,
+    text="+",
+    color="grey",
+    height=0.0435,
+    name="fixation",
+)
 start_msg = visual.TextStim(
-    text=starting_instructions,
+    text="Naciśnij spację, aby rozpocząć.",
     win=win,
     antialias=True,
     font="Arial",
@@ -85,28 +96,35 @@ start_msg = visual.TextStim(
     alignText="center",
     pos=(0, 0),
 )
-fixation = visual.TextStim(
-    win=win,
-    text="+",
-    color="grey",
-    height=0.0435,
-    name="fixation",
-)
+
+# # wait for key press or mouse click
+# mouse.clickReset()
+# while True:
+#     _, press_times = mouse.getPressed(getTime=True)
+#     if press_times[0] > 0:
+#         break
+#     core.wait(0.030)
+
 start_msg.draw()
 win.flip()
-
-# wait for key press or mouse click
-mouse.clickReset()
-while True:
-    _, press_times = mouse.getPressed(getTime=True)
-    if press_times[0] > 0:
-        break
-    core.wait(0.030)
-
-
+# wait for space key press
+event.waitKeys(keyList=["space"])
 fixation.draw()
 win.flip()
 
+# instructions
+sound_file = os.path.join("rest_remy_pl", f"instruction.wav")
+playsound.playsound(sound_file, block=True)
+
+# wait for space key press
+event.waitKeys(keyList=["space"])
+
+# start recording
+sound_file = os.path.join("rest_remy_pl", f"start_recording.wav")
+playsound.playsound(sound_file, block=True)
+
+fixation.draw()
+win.flip()
 
 block_time = 60
 start_time = time.time()
@@ -124,7 +142,11 @@ for i, block in enumerate(blocks):
     port_eeg.setData(0x00)
     time.sleep(0.005)
 
-    sound_file = os.path.join("messages", f"{block}.wav")
+    sound_file = os.path.join("rest_remy_pl", f"{block}.wav")
+    playsound.playsound(sound_file, block=True)
+    time.sleep(0.5)
+
+    sound_file = os.path.join("rest_remy_pl", f"relax.wav")
     playsound.playsound(sound_file, block=True)
 
     block_end = start_time + block_time * (i + 1)
@@ -140,7 +162,7 @@ time.sleep(0.005)
 
 
 msg = visual.TextStim(
-    text="Koniec.\nZaczekaj na eksperymentatora.\n\n(Kliknij myszką, aby wyjść.)",
+    text="Zakończyliśmy rejestrację sygnału EEG.\nZaczekaj na eksperymentatora.\n\n(Naciśnij spację, aby wyjść.)",
     win=win,
     antialias=True,
     font="Arial",
@@ -153,18 +175,11 @@ msg = visual.TextStim(
 msg.draw()
 win.flip()
 
-sound_file = os.path.join("messages", f"end.wav")
+sound_file = os.path.join("rest_remy_pl", f"end_recording.wav")
 playsound.playsound(sound_file, block=True)
 
-# wait for key press or mouse click
-mouse.clickReset()
-while True:
-    _, press_times = mouse.getPressed(getTime=True)
-    if press_times[0] > 0:
-        break
-    core.wait(0.030)
-
-
+# wait for space key press
+event.waitKeys(keyList=["space"])
 
 # play it with psychopy
 # sound = sound.Sound(sound_file)
