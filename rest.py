@@ -144,14 +144,13 @@ for i, block in enumerate(blocks):
 
     sound_file = os.path.join("rest_remy_pl", f"{block}.wav")
     playsound.playsound(sound_file, block=True)
-    time.sleep(0.5)
 
-    sound_file = os.path.join("rest_remy_pl", f"relax.wav")
-    playsound.playsound(sound_file, block=True)
+    # time.sleep(0.5)
+    # sound_file = os.path.join("rest_remy_pl", f"relax.wav")
+    # playsound.playsound(sound_file, block=True)
 
     block_end = start_time + block_time * (i + 1)
     time.sleep(block_end - time.time())
-
 
 # send trigger
 # 3 means the end
@@ -162,7 +161,7 @@ time.sleep(0.005)
 
 
 msg = visual.TextStim(
-    text="Zakończyliśmy rejestrację sygnału EEG.\nZaczekaj na eksperymentatora.\n\n(Naciśnij spację, aby wyjść.)",
+    text="Zakończyliśmy rejestrację sygnału EEG.\n\nZaczekaj na eksperymentatora.\n\n(Naciśnij spację, aby wyjść.)",
     win=win,
     antialias=True,
     font="Arial",
