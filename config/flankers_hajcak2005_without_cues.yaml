@@ -31,6 +31,8 @@ Blank_screen_for_response_show_time: [1.700, 2.300, 0.100]
 Experiment_blocks: [
     {type: break, file_name: instruction.txt},
     {type: training, number_of_trials: 48, ratio_of_congruent: 0.5},
+    {type: break, file_name: next_training.txt},
+    {type: training, number_of_trials: 48, ratio_of_congruent: 0.5, ratio_of_first_cue: 0.5},
     {type: break, file_name: end_training.txt},
     {type: rest, duration: 30, info_duration: 4, file_name: rest_info.txt},
 
