@@ -47,8 +47,10 @@ blocks2 = ["closed", "open", "open", "closed", "open", "closed", "closed", "open
 
 version = sys.argv[1]
 if version == "open":
+    condition_trigger = 7  # Condition 1
     blocks = blocks1
 elif version == "closed":
+    condition_trigger = 8  # Condition 2
     blocks = blocks2
 else:
     raise ValueError(f"Unknown version: {version} (should be 'open' or 'closed')")
@@ -112,6 +114,12 @@ event.waitKeys(keyList=["space"])
 fixation.draw()
 win.flip()
 
+# Send condition trigger
+port_eeg.setData(condition_trigger)
+time.sleep(0.005)
+port_eeg.setData(0x00)
+time.sleep(0.005)
+
 # instructions
 sound_file = os.path.join("rest_remy_pl", f"instruction.wav")
 playsound.playsound(sound_file, block=True)
@@ -126,7 +134,7 @@ playsound.playsound(sound_file, block=True)
 fixation.draw()
 win.flip()
 
-block_time = 60
+block_time = 63
 start_time = time.time()
 for i, block in enumerate(blocks):
     if block.split("_")[-1] == "open":
