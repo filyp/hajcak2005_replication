@@ -61,6 +61,6 @@ for beh_file in (results_dir / "BEH").glob("*.csv"):
     new_trig_file = results_dir / "Full Recode Remapped" / f"triggerMap_{name}.txt"
     # mkdir if not exists
     new_trig_file.parent.mkdir(parents=True, exist_ok=True)
-    new_trig_file.write_text("\n".join(new_trigs) + "\n")
+    new_trig_file.write_text("\r\n".join(new_trigs) + "\r\n")
 
 # %%
