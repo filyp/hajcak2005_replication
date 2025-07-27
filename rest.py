@@ -73,6 +73,13 @@ print(blocks)
 
 port_eeg = create_eeg_port()
 
+# # mock the port for testing
+# from types import SimpleNamespace
+# port_eeg = SimpleNamespace()
+# def setData(data):
+#     print(f"Setting data to {data}")
+# port_eeg.setData = setData
+
 
 win, screen_res = create_win(
     screen_color="black",
@@ -158,7 +165,14 @@ for i, block in enumerate(blocks):
     # playsound.playsound(sound_file, block=True)
 
     block_end = start_time + block_time * (i + 1)
-    time.sleep(block_end - time.time())
+    time_to_wait = block_end - time.time()
+    # time.sleep(time_to_wait)
+    keys = event.waitKeys(
+        keyList=["f7"],
+        maxWait=time_to_wait,
+    )
+    if keys:
+        exit(1)
 
 # send trigger
 # 3 means the end
