@@ -82,10 +82,10 @@ def flanker_task(exp, config, data_saver):
         # logging.flush()
 
         if block["type"] == "break":
-            show_info(block["file_name"], exp)
+            show_info(block["file_name"], exp, required_click=None)
             continue
         elif block["type"] == "rest":
-            show_info(block["file_name"], exp, duration=block["info_duration"])
+            show_info(block["file_name"], exp, duration=block["info_duration"], required_click=None)
             trigger_name = get_trigger_name(TriggerTypes.FIXATION, block, response="-")
             exp.display_for_duration(block["duration"], stimulus["fixation"], trigger_name)
             continue
