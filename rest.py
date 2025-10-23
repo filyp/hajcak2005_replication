@@ -26,7 +26,7 @@ from psychopy_experiment_helpers.experiment_info import (
 )
 from psychopy_experiment_helpers.save_data import DataSaver
 from psychopy_experiment_helpers.screen import create_win
-from psychopy_experiment_helpers.triggers_common import TriggerHandler, create_eeg_port
+from psychopy_experiment_helpers.triggers_common import TriggerHandler, create_eeg_port, simple_send_trigger
 
 # starting_instructions = """\
 # Teraz nagramy 8 minut danych w spoczynku. W tym czasie będziesz siedział/a wygodnie w fotelu, z zamkniętymi lub otwartymi oczami. W trakcie nagrywania usłyszysz komendy głosowe, które będą Ci mówić, kiedy masz otworzyć lub zamknąć oczy. 
@@ -73,14 +73,6 @@ print(blocks)
 
 port_eeg = create_eeg_port()
 
-# # mock the port for testing
-# from types import SimpleNamespace
-# port_eeg = SimpleNamespace()
-# def setData(data):
-#     print(f"Setting data to {data}")
-# port_eeg.setData = setData
-
-
 win, screen_res = create_win(
     screen_color="black",
     screen_number=-1,
@@ -122,10 +114,7 @@ fixation.draw()
 win.flip()
 
 # Send condition trigger
-port_eeg.setData(condition_trigger)
-time.sleep(0.005)
-port_eeg.setData(0x00)
-time.sleep(0.005)
+simple_send_trigger(port_eeg, condition_trigger)
 
 # instructions
 sound_file = os.path.join("rest_remy_pl", f"instruction.wav")
@@ -152,10 +141,7 @@ for i, block in enumerate(blocks):
         raise ValueError(f"Unknown block type: {block}")
 
     # send trigger
-    port_eeg.setData(trigger_no)
-    time.sleep(0.005)
-    port_eeg.setData(0x00)
-    time.sleep(0.005)
+    simple_send_trigger(port_eeg, trigger_no)
 
     sound_file = os.path.join("rest_remy_pl", f"{block}.wav")
     playsound.playsound(sound_file, block=True)
@@ -176,10 +162,7 @@ for i, block in enumerate(blocks):
 
 # send trigger
 # 3 means the end
-port_eeg.setData(3)
-time.sleep(0.005)
-port_eeg.setData(0x00)
-time.sleep(0.005)
+simple_send_trigger(port_eeg, 3)
 
 
 msg = visual.TextStim(
