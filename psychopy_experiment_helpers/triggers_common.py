@@ -7,12 +7,11 @@ from psychopy import logging
 #     try:
 #         import parallel
 
-        # port = parallel.Parallel()
-        # port.setData(0x00)
-        # return port
-    # except:
-        # raise Exception("Can't connect to EEG")
-
+#         port = parallel.Parallel()
+#         port.setData(0x00)
+#         return port
+#     except:
+#         raise Exception("Can't connect to EEG")
 
 def create_eeg_port():
     try:
@@ -30,6 +29,7 @@ def simple_send_trigger(port_eeg, trigger_no):
     time.sleep(0.005)
     port_eeg.write(0x00)
     time.sleep(0.005)
+
 
 
 class TriggerHandler:
