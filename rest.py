@@ -75,7 +75,7 @@ port_eeg = create_eeg_port()
 
 win, screen_res = create_win(
     screen_color="black",
-    screen_number=-1,
+    screen_number=0,
 )
 mouse = event.Mouse(win=win, visible=False)
 

@@ -10,6 +10,27 @@ git clone https://github.com/filyp/hajcak2005_replication.git
 
 # Running the experiment
 
+## On Windows
 Click `run_experiment_with_cues.bat` or `run_experiment_without_cues.bat` to run the experiments.
 
+## From bash
+
+```bash
+python main.py config/flankers_hajcak2005_with_cues.yaml
+```
+or
+```bash
+python main.py config/flankers_hajcak2005_without_cues.yaml
+```
+
+## Running the rest procedure
+```bash
+python rest.py open
+```
+or
+```bash
+python rest.py closed
+```
+
+## Adaptation
 You may need to adapt the mechanism of sending triggers to your setup. Edit the file `psychopy_experiment_helpers/triggers_common.py` to do so.

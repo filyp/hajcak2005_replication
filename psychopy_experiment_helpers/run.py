@@ -47,7 +47,7 @@ class Experiment:
         # screen
         self.win, self.screen_res = create_win(
             screen_color=self.config["Screen_color"],
-            screen_number=self.config.get("Screen_number", -1),
+            screen_number=self.config.get("Screen_number", 0),
         )
 
         self.clock = core.Clock()
