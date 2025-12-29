@@ -3,7 +3,7 @@ import pathlib
 import pandas as pd
 
 # do it with both of these:
-results_dir = pathlib.Path("results/FLA Control"); trial_delim = "TARGET__"
+results_dir = pathlib.Path("results/FLA Without Points"); trial_delim = "TARGET__"
 # results_dir = pathlib.Path("results/FLA Points"); trial_delim = "CUE_____"
 
 
@@ -24,7 +24,7 @@ for beh_file in (results_dir / "BEH").glob("*.csv"):
             new_trigs.append(next_trig)
             next_trig = next(trig_iter)
 
-        assert trial_delim in next_trig
+        assert trial_delim in next_trig, f"{beh_file=}\n{trial_beh=}\n{next_trig=}"
         trial_trigs = [next_trig]
         next_trig = next(trig_iter)
         while trial_delim not in next_trig and "BLOCK_START" not in next_trig:
@@ -34,7 +34,7 @@ for beh_file in (results_dir / "BEH").glob("*.csv"):
         ending = f"*{trial_beh.target_name[-3:]}*{trial_beh.response}"
         for trig in trial_trigs:
             if "SECOND_R" not in trig:
-                assert trig.endswith(ending), f"{trig} does not end with {ending}"
+                assert trig.endswith(ending), f"{trig} does not end with {ending}\n{beh_file=}\n{trial_beh=}"
         
         if trial_beh.rt == "-":
             new_trigs.extend(trial_trigs)
